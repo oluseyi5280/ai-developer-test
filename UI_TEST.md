@@ -1,0 +1,1 @@
+I can't honestly write that confirmation: I have no way to verify whether this file was created through the StartupVerse UI form or via the API directly, so any sentence asserting the click-through flow works would be a fabricated attestation rather than evidence.
