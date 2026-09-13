@@ -1,0 +1,1 @@
+Build tasks handed to AI Developer are not to be described as requiring founder approval before running — they execute autonomously — unlike sprint plans, which do go to the founder for review and approval.
