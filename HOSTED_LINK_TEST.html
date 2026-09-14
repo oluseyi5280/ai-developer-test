@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hosted Link Test Page</title>
+<style>
+  :root {
+    --ink: #0f172a;
+    --muted: #64748b;
+    --accent: #4f46e5;
+    --surface: #f6f7fb;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { height: 100%; }
+
+  body {
+    margin: 0;
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background:
+      radial-gradient(60% 60% at 50% 0%, rgba(79, 70, 229, 0.10) 0%, rgba(79, 70, 229, 0) 70%),
+      var(--surface);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  main {
+    text-align: center;
+    padding: clamp(32px, 6vw, 64px) clamp(24px, 6vw, 72px);
+    background: #ffffff;
+    border: 1px solid #e5e7f0;
+    border-radius: 16px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 12px 32px rgba(15, 23, 42, 0.06);
+    max-width: 640px;
+    width: 100%;
+  }
+
+  .mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 24px;
+    border-radius: 12px;
+    background: rgba(79, 70, 229, 0.10);
+    color: var(--accent);
+  }
+
+  .mark svg { width: 24px; height: 24px; }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(1.75rem, 5vw, 2.75rem);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+
+  .rule {
+    width: 48px;
+    height: 3px;
+    margin: 24px auto 0;
+    border-radius: 999px;
+    background: var(--accent);
+  }
+
+  @media (max-width: 640px) {
+    body { padding: 16px; }
+    main { padding: 32px 20px; border-radius: 12px; }
+    .mark { margin-bottom: 16px; }
+  }
+</style>
+</head>
+<body>
+  <main>
+    <span class="mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 15l6-6"></path>
+        <path d="M10.5 5.5l1-1a5 5 0 0 1 7 7l-1 1"></path>
+        <path d="M13.5 18.5l-1 1a5 5 0 0 1-7-7l1-1"></path>
+      </svg>
+    </span>
+    <h1>Hosted Link Test Page</h1>
+    <div class="rule" aria-hidden="true"></div>
+  </main>
+</body>
+</html>
