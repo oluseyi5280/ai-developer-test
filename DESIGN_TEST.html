@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nimbus — Keep your team in sync</title>
+<style>
+  :root{
+    --accent:#4f46e5;
+    --accent-dark:#4338ca;
+    --accent-ink:#312e81;
+    --accent-soft:#eef0ff;
+    --ink:#0b1020;
+    --muted:#5a6178;
+    --line:#e6e8f0;
+    --surface:#ffffff;
+    --bg:#f6f7fb;
+    --radius:20px;
+  }
+
+  *,*::before,*::after{box-sizing:border-box}
+
+  html,body{margin:0}
+
+  body{
+    font-family:ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+
+  /* ---------- Section: hero ---------- */
+  .hero{
+    position:relative;
+    display:flex;
+    align-items:center;
+    min-height:100vh;
+    min-height:100svh;
+    padding:clamp(48px, 8vw, 96px) 24px;
+    overflow:hidden;
+  }
+
+  /* soft colour wash */
+  .hero::before{
+    content:"";
+    position:absolute;
+    inset:-20% -10% -10% -10%;
+    background:
+      radial-gradient(58% 52% at 78% 16%, rgba(79,70,229,.20), transparent 70%),
+      radial-gradient(46% 42% at 10% 6%, rgba(14,165,233,.14), transparent 70%);
+    pointer-events:none;
+  }
+
+  /* faint grid texture, faded at the edges */
+  .hero::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background-image:
+      linear-gradient(to right, rgba(11,16,32,.045) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(11,16,32,.045) 1px, transparent 1px);
+    background-size:64px 64px;
+    -webkit-mask-image:radial-gradient(72% 62% at 50% 40%, #000, transparent 76%);
+    mask-image:radial-gradient(72% 62% at 50% 40%, #000, transparent 76%);
+    pointer-events:none;
+  }
+
+  .hero__inner{
+    position:relative;
+    z-index:1;
+    width:100%;
+    max-width:1120px;
+    margin:0 auto;
+    display:grid;
+    grid-template-columns:minmax(0, 1.05fr) minmax(0, .95fr);
+    gap:clamp(32px, 6vw, 80px);
+    align-items:center;
+  }
+
+  /* ---------- Copy column ---------- */
+  .eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:6px 12px;
+    border-radius:999px;
+    background:var(--accent-soft);
+    border:1px solid rgba(79,70,229,.16);
+    color:var(--accent-dark);
+    font-size:.8125rem;
+    font-weight:600;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+  }
+  .eyebrow svg{width:14px;height:14px}
+
+  h1{
+    margin:24px 0 0;
+    font-size:clamp(2.25rem, 5.2vw, 3.75rem);
+    line-height:1.05;
+    letter-spacing:-.03em;
+    font-weight:800;
+  }
+
+  h1 em{
+    font-style:normal;
+    color:var(--accent);
+    background-image:linear-gradient(transparent 64%, rgba(79,70,229,.18) 64%);
+    -webkit-box-decoration-break:clone;
+    box-decoration-break:clone;
+  }
+
+  .lede{
+    margin:24px 0 0;
+    max-width:46ch;
+    font-size:clamp(1rem, 1.4vw, 1.125rem);
+    line-height:1.7;
+    color:var(--muted);
+    font-weight:400;
+  }
+
+  .cta{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    margin-top:32px;
+    padding:16px 28px;
+    border-radius:12px;
+    background:var(--accent);
+    color:#fff;
+    font-size:1rem;
+    font-weight:600;
+    text-decoration:none;
+    box-shadow:0 1px 2px rgba(11,16,32,.12), 0 16px 32px -16px rgba(79,70,229,.72);
+    transition:background .18s ease, transform .18s ease, box-shadow .18s ease;
+  }
+  .cta svg{width:18px;height:18px}
+  .cta:hover{
+    background:var(--accent-dark);
+    transform:translateY(-1px);
+    box-shadow:0 1px 2px rgba(11,16,32,.14), 0 22px 40px -18px rgba(79,70,229,.85);
+  }
+  .cta:focus-visible{
+    outline:3px solid rgba(79,70,229,.45);
+    outline-offset:3px;
+  }
+
+  .note{
+    margin:16px 0 0;
+    font-size:.875rem;
+    color:var(--muted);
+  }
+
+  /* ---------- Visual column ---------- */
+  .visual{
+    position:relative;
+    justify-self:center;
+    width:100%;
+    max-width:400px;
+  }
+
+  .card{
+    position:relative;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:24px;
+    box-shadow:0 1px 2px rgba(11,16,32,.05), 0 40px 80px -40px rgba(11,16,32,.36);
+    animation:float 7s ease-in-out infinite;
+  }
+
+  @keyframes float{
+    0%,100%{transform:translateY(-6px)}
+    50%{transform:translateY(6px)}
+  }
+
+  .card__head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    padding-bottom:16px;
+    border-bottom:1px solid var(--line);
+  }
+
+  .card__title{
+    font-size:.75rem;
+    font-weight:700;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--muted);
+  }
+
+  .pill{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:4px 10px;
+    border-radius:999px;
+    background:var(--accent-soft);
+    color:var(--accent-dark);
+    font-size:.75rem;
+    font-weight:700;
+  }
+  .pill svg{width:13px;height:13px}
+
+  .member{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    padding:12px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .member:last-of-type{border-bottom:0}
+
+  .avatar{
+    flex:0 0 auto;
+    width:40px;
+    height:40px;
+    border-radius:50%;
+    display:grid;
+    place-items:center;
+    font-size:.8125rem;
+    font-weight:700;
+    color:var(--accent-ink);
+    background:rgba(79,70,229,.14);
+    border:1px solid rgba(79,70,229,.18);
+  }
+  .avatar--sky{
+    background:rgba(14,165,233,.13);
+    border-color:rgba(14,165,233,.18);
+    color:#0c4a6e;
+  }
+  .avatar--slate{
+    background:rgba(11,16,32,.07);
+    border-color:rgba(11,16,32,.10);
+    color:#334155;
+  }
+
+  .member__name{
+    font-size:.9375rem;
+    font-weight:600;
+    color:var(--ink);
+  }
+
+  .member__meta{
+    font-size:.8125rem;
+    font-weight:400;
+    color:var(--muted);
+  }
+
+  .member__check{
+    margin-left:auto;
+    display:flex;
+    color:var(--accent);
+  }
+  .member__check svg{width:18px;height:18px}
+
+  .card__foot{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-top:16px;
+    padding-top:16px;
+    border-top:1px solid var(--line);
+    font-size:.8125rem;
+    color:var(--muted);
+  }
+
+  .dot{
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:var(--accent);
+    box-shadow:0 0 0 4px rgba(79,70,229,.14);
+  }
+
+  .chip{
+    position:absolute;
+    left:-20px;
+    bottom:40px;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:8px 14px;
+    border-radius:999px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    box-shadow:0 16px 40px -16px rgba(11,16,32,.30);
+    font-size:.8125rem;
+    font-weight:600;
+    color:var(--ink);
+  }
+  .chip svg{width:16px;height:16px;color:var(--accent)}
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 640px){
+    .hero{
+      padding:64px 20px;
+      align-items:flex-start;
+    }
+    .hero__inner{
+      grid-template-columns:1fr;
+      gap:40px;
+    }
+    .lede{max-width:none}
+    .visual{max-width:none}
+    .chip{display:none}
+    .cta{width:100%;justify-content:center}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .card{animation:none}
+    .cta{transition:none}
+  }
+</style>
+</head>
+<body>
+  <main class="hero">
+    <div class="hero__inner">
+
+      <div class="copy">
+        <span class="eyebrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"></circle>
+            <path d="M3.6 9h16.8M3.6 15h16.8"></path>
+            <path d="M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18z"></path>
+          </svg>
+          Built for distributed teams
+        </span>
+
+        <h1>Nimbus keeps your team <em>in sync</em></h1>
+
+        <p class="lede">
+          Nimbus is the shared workspace that keeps distributed teams aligned — one place for
+          decisions, updates and handoffs, so nobody has to ask what changed while they were
+          asleep.
+        </p>
+
+        <a class="cta" href="#">
+          Get started
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M5 12h14"></path>
+            <path d="M13 6l6 6-6 6"></path>
+          </svg>
+        </a>
+
+        <p class="note">Free for teams up to 10 — no credit card required.</p>
+      </div>
+
+      <div class="visual" aria-hidden="true">
+        <div class="card">
+          <div class="card__head">
+            <span class="card__title">Team status</span>
+            <span class="pill">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 12.5l5 5L20 6.5"></path>
+              </svg>
+              In sync
+            </span>
+          </div>
+
+          <div class="member">
+            <span class="avatar">MC</span>
+            <span>
+              <span class="member__name">Maya Chen</span><br>
+              <span class="member__meta">Product · Berlin</span>
+            </span>
+            <span class="member__check">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 12.5l5 5L20 6.5"></path>
+              </svg>
+            </span>
+          </div>
+
+          <div class="member">
+            <span class="avatar avatar--sky">TR</span>
+            <span>
+              <span class="member__name">Tomas Ruiz</span><br>
+              <span class="member__meta">Engineering · Lisbon</span>
+            </span>
+            <span class="member__check">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 12.5l5 5L20 6.5"></path>
+              </svg>
+            </span>
+          </div>
+
+          <div class="member">
+            <span class="avatar avatar--slate">PN</span>
+            <span>
+              <span class="member__name">Priya Nair</span><br>
+              <span class="member__meta">Design · Bangalore</span>
+            </span>
+            <span class="member__check">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 12.5l5 5L20 6.5"></path>
+              </svg>
+            </span>
+          </div>
+
+          <div class="card__foot">
+            <span class="dot"></span>
+            Last synced 2 minutes ago
+          </div>
+        </div>
+
+        <span class="chip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6.5 18a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 17.5 8.2A3.9 3.9 0 0 1 17 18z"></path>
+          </svg>
+          3 timezones · 1 source of truth
+        </span>
+      </div>
+
+    </div>
+  </main>
+</body>
+</html>
