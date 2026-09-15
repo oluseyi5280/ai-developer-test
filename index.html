@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Beacon — Turn customer feedback into a roadmap users love</title>
+<meta name="description" content="Beacon collects every ticket, review and call note in one place, clusters it automatically, and shows your product team exactly what to build next.">
+<style>
+  :root{
+    --blue-50:#eff6ff;
+    --blue-100:#dbeafe;
+    --blue-200:#bfdbfe;
+    --blue-300:#93c5fd;
+    --blue-500:#3b82f6;
+    --blue-600:#2563eb;
+    --blue-700:#1d4ed8;
+    --blue-900:#0b2a5f;
+
+    --ink:#0b1220;
+    --ink-2:#26334d;
+    --muted:#5a6b85;
+    --line:#e3eaf6;
+    --bg:#ffffff;
+    --bg-tint:#f6f9ff;
+
+    --radius:16px;
+    --shadow-sm:0 1px 2px rgba(11,18,32,.05), 0 1px 3px rgba(11,18,32,.05);
+    --shadow-md:0 14px 34px -16px rgba(15,44,107,.30);
+    --shadow-lg:0 34px 64px -28px rgba(15,44,107,.42);
+  }
+
+  *,*::before,*::after{box-sizing:border-box}
+  [hidden]{display:none !important}
+
+  html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,"Helvetica Neue",Arial,sans-serif;
+    font-size:1rem;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  h1,h2,h3,h4{
+    margin:0;
+    color:var(--ink);
+    font-weight:700;
+    line-height:1.15;
+    letter-spacing:-.022em;
+  }
+  h1{font-size:clamp(2.3rem,5vw,3.6rem);font-weight:800;letter-spacing:-.032em;line-height:1.06}
+  h2{font-size:clamp(1.8rem,3.3vw,2.55rem);font-weight:800;letter-spacing:-.028em;line-height:1.12}
+  h3{font-size:1.1rem}
+  p{margin:0}
+  a{color:inherit}
+  ul{margin:0;padding:0;list-style:none}
+  svg{display:block}
+
+  .container{width:100%;max-width:1160px;margin:0 auto;padding:0 24px}
+  .section{padding:clamp(64px,8vw,104px) 0}
+  .section-tint{background:linear-gradient(180deg,var(--bg-tint) 0%,#ffffff 100%)}
+  section[id]{scroll-margin-top:88px}
+
+  .sr-only{
+    position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+    overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;
+  }
+
+  /* ---------- shared bits ---------- */
+  .eyebrow{
+    display:inline-block;
+    margin-bottom:14px;
+    color:var(--blue-600);
+    font-size:.775rem;
+    font-weight:700;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+  }
+  .section-head{max-width:660px;margin:0 auto clamp(40px,5.5vw,60px);text-align:center}
+  .section-head p{margin-top:16px;color:var(--muted);font-size:1.06rem}
+
+  .pill{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:6px 14px 6px 10px;
+    border:1px solid var(--blue-100);
+    border-radius:999px;
+    background:var(--blue-50);
+    color:var(--blue-700);
+    font-size:.81rem;font-weight:600;letter-spacing:.01em;
+  }
+  .pill svg{width:15px;height:15px}
+  .pill-on-dark{
+    background:rgba(255,255,255,.1);
+    border-color:rgba(255,255,255,.24);
+    color:#dbeafe;
+  }
+
+  .btn{
+    display:inline-flex;align-items:center;gap:9px;
+    padding:12px 20px;
+    border:1px solid transparent;
+    border-radius:10px;
+    font-family:inherit;
+    font-size:.94rem;font-weight:600;
+    text-decoration:none;
+    cursor:pointer;
+    transition:background .18s,border-color .18s,color .18s,transform .18s,box-shadow .18s;
+  }
+  .btn svg{width:17px;height:17px;flex:none}
+  .btn-lg{padding:14px 26px;font-size:1rem}
+  .btn-primary{
+    background:var(--blue-600);color:#fff;
+    box-shadow:0 12px 26px -14px rgba(37,99,235,.95);
+  }
+  .btn-primary:hover{background:var(--blue-700);transform:translateY(-1px)}
+  .btn-outline{background:#fff;color:var(--ink);border-color:var(--line);box-shadow:var(--shadow-sm)}
+  .btn-outline:hover{border-color:var(--blue-300);color:var(--blue-700)}
+  .btn-light{background:#fff;color:var(--blue-700);box-shadow:0 12px 26px -16px rgba(2,10,30,.9)}
+  .btn-light:hover{background:var(--blue-50)}
+  .btn:disabled{opacity:.72;cursor:default;transform:none}
+
+  .icon-box{
+    display:grid;place-items:center;
+    width:44px;height:44px;
+    border:1px solid var(--blue-100);
+    border-radius:12px;
+    background:var(--blue-50);
+    color:var(--blue-600);
+  }
+  .icon-box svg{width:21px;height:21px}
+
+  /* ---------- header ---------- */
+  .site-header{
+    position:sticky;top:0;z-index:50;
+    border-bottom:1px solid var(--line);
+    background:rgba(255,255,255,.84);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+  }
+  .nav{display:flex;align-items:center;justify-content:space-between;gap:24px;height:72px}
+  .brand{
+    display:flex;align-items:center;gap:10px;
+    font-size:1.06rem;font-weight:800;letter-spacing:-.022em;
+    text-decoration:none;
+  }
+  .brand-mark{
+    display:grid;place-items:center;
+    width:34px;height:34px;flex:none;
+    border-radius:10px;
+    background:linear-gradient(140deg,var(--blue-500),var(--blue-700));
+    color:#fff;
+    box-shadow:0 10px 22px -12px rgba(37,99,235,1);
+  }
+  .brand-mark svg{width:19px;height:19px}
+  .nav-links{display:flex;gap:30px;font-size:.94rem;font-weight:500;color:var(--ink-2)}
+  .nav-links a{text-decoration:none;transition:color .18s}
+  .nav-links a:hover{color:var(--blue-600)}
+  .nav-cta{display:flex;align-items:center;gap:16px}
+  .btn-quiet{
+    padding:8px 0;
+    font-size:.94rem;font-weight:600;color:var(--ink-2);
+    text-decoration:none;
+  }
+  .btn-quiet:hover{color:var(--blue-600)}
+
+  /* ---------- hero ---------- */
+  .hero{
+    position:relative;
+    overflow:hidden;
+    padding:clamp(56px,7vw,92px) 0 clamp(64px,8vw,104px);
+    background:
+      radial-gradient(880px 520px at 10% -12%, rgba(37,99,235,.17), transparent 70%),
+      radial-gradient(700px 460px at 94% 4%, rgba(59,130,246,.15), transparent 72%),
+      linear-gradient(180deg,#f6faff 0%,#ffffff 76%);
+  }
+  .hero-grid{
+    position:relative;
+    display:grid;
+    grid-template-columns:1.02fr .98fr;
+    gap:clamp(40px,5vw,72px);
+    align-items:center;
+  }
+  .hero-copy{max-width:600px}
+  .hero-copy h1{margin-top:22px}
+  .accent{color:var(--blue-600)}
+  .lede{
+    margin-top:20px;max-width:35rem;
+    color:var(--muted);
+    font-size:clamp(1.03rem,1.5vw,1.15rem);
+  }
+  .hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:32px}
+  .hero-checks{
+    display:flex;flex-wrap:wrap;gap:10px 24px;
+    margin-top:28px;
+    color:var(--muted);font-size:.9rem;
+  }
+  .hero-checks li{display:flex;align-items:center;gap:8px}
+  .hero-checks svg{width:16px;height:16px;flex:none;color:var(--blue-600)}
+
+  /* ---------- product mock ---------- */
+  .hero-visual{position:relative}
+  .mock{
+    position:relative;
+    overflow:hidden;
+    border:1px solid var(--line);
+    border-radius:18px;
+    background:#fff;
+    box-shadow:var(--shadow-lg);
+  }
+  .mock-top{
+    display:flex;align-items:center;gap:7px;
+    padding:13px 16px;
+    border-bottom:1px solid var(--line);
+    background:#fbfdff;
+  }
+  .dot{width:9px;height:9px;border-radius:50%;background:#dbe4f3}
+  .dot:first-child{background:var(--blue-300)}
+  .mock-title{
+    margin-left:10px;
+    color:var(--muted);font-size:.75rem;font-weight:600;letter-spacing:.02em;
+  }
+  .mock-cols{display:grid;grid-template-columns:110px 1fr;min-height:306px}
+  .mock-side{
+    display:flex;flex-direction:column;gap:13px;
+    padding:20px 14px;
+    border-right:1px solid var(--line);
+    background:#fcfdff;
+  }
+  .side-item{height:9px;border-radius:5px;background:#e7eef9}
+  .side-item.active{background:linear-gradient(90deg,var(--blue-500),var(--blue-600))}
+  .mock-list{display:flex;flex-direction:column;gap:11px;padding:16px 16px 20px}
+  .mock-row{
+    display:flex;align-items:center;gap:12px;
+    padding:11px 12px;
+    border:1px solid var(--line);
+    border-radius:12px;
+    background:#fff;
+    box-shadow:var(--shadow-sm);
+  }
+  .mock-avatar{
+    width:26px;height:26px;flex:none;border-radius:8px;
+    background:linear-gradient(140deg,var(--blue-100),var(--blue-300));
+  }
+  .mock-lines{flex:1;display:flex;flex-direction:column;gap:7px}
+  .mock-lines i{display:block;height:8px;border-radius:4px;background:#e7eef9}
+  .chip{
+    flex:none;
+    padding:3px 9px;
+    border:1px solid var(--blue-100);
+    border-radius:999px;
+    background:var(--blue-50);
+    color:var(--blue-700);
+    font-size:.67rem;font-weight:700;letter-spacing:.03em;
+  }
+  .chip-slate{background:#f1f5fb;border-color:#e3eaf6;color:#5a6b85}
+  .mock-float{
+    position:absolute;left:-22px;bottom:34px;
+    display:flex;align-items:center;gap:12px;
+    padding:12px 16px;
+    border:1px solid var(--line);
+    border-radius:14px;
+    background:#fff;
+    box-shadow:var(--shadow-md);
+  }
+  .float-icon{
+    display:grid;place-items:center;
+    width:34px;height:34px;flex:none;
+    border-radius:10px;
+    background:var(--blue-50);
+    color:var(--blue-600);
+  }
+  .float-icon svg{width:18px;height:18px}
+  .mock-float strong{display:block;font-size:1.05rem;font-weight:800;letter-spacing:-.025em;line-height:1.2}
+  .mock-float small{display:block;color:var(--muted);font-size:.73rem;line-height:1.3}
+
+  /* ---------- proof strip ---------- */
+  .proof{padding:0 0 clamp(56px,7vw,88px)}
+  .proof-label{
+    text-align:center;
+    color:#93a4bf;
+    font-size:.78rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  }
+  .proof-logos{
+    display:flex;flex-wrap:wrap;justify-content:center;
+    gap:18px 46px;
+    margin-top:26px;
+  }
+  .proof-logos span{
+    color:#a7b6cf;
+    font-size:1rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  }
+
+  /* ---------- features ---------- */
+  .feature-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+    gap:24px;
+  }
+  .card{
+    padding:28px 26px 30px;
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    background:#fff;
+    box-shadow:var(--shadow-sm);
+    transition:transform .2s,box-shadow .2s,border-color .2s;
+  }
+  .card:hover{transform:translateY(-3px);border-color:var(--blue-200);box-shadow:var(--shadow-md)}
+  .card h3{margin-top:18px}
+  .card p{margin-top:10px;color:var(--muted);font-size:.955rem}
+
+  /* ---------- how it works ---------- */
+  .how-grid{
+    display:grid;
+    grid-template-columns:.88fr 1.12fr;
+    gap:clamp(40px,5vw,72px);
+    align-items:start;
+  }
+  .how-copy h2{margin-bottom:18px}
+  .how-copy > p{color:var(--muted);font-size:1.03rem}
+  .mini-note{
+    display:flex;gap:14px;align-items:flex-start;
+    margin-top:28px;
+    padding:20px 22px;
+    border:1px solid var(--blue-100);
+    border-radius:14px;
+    background:var(--blue-50);
+  }
+  .mini-note svg{width:20px;height:20px;flex:none;margin-top:2px;color:var(--blue-600)}
+  .mini-note p{color:var(--blue-900);font-size:.93rem}
+  .mini-note strong{font-weight:700}
+
+  .steps{display:flex;flex-direction:column;gap:18px}
+  .step{
+    display:flex;gap:20px;
+    padding:24px 26px;
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    background:#fff;
+    box-shadow:var(--shadow-sm);
+  }
+  .step-num{
+    display:grid;place-items:center;
+    width:38px;height:38px;flex:none;
+    border-radius:11px;
+    background:linear-gradient(140deg,var(--blue-500),var(--blue-700));
+    color:#fff;
+    font-size:.95rem;font-weight:800;
+    box-shadow:0 12px 24px -14px rgba(37,99,235,1);
+  }
+  .step h3{font-size:1.04rem}
+  .step p{margin-top:8px;color:var(--muted);font-size:.945rem}
+
+  /* ---------- dark band ---------- */
+  .band{
+    position:relative;
+    overflow:hidden;
+    background:linear-gradient(150deg,#0a2450 0%,#123f8f 58%,#1b52b8 100%);
+    color:#eaf1ff;
+  }
+  .band::before{
+    content:"";
+    position:absolute;
+    inset:-38% 34% auto -12%;
+    height:520px;
+    background:radial-gradient(closest-side,rgba(96,165,250,.34),transparent);
+    pointer-events:none;
+  }
+  .band .container{position:relative}
+  .band-head{max-width:620px;margin-bottom:clamp(36px,5vw,52px)}
+  .band h2{color:#fff}
+  .band-head p{margin-top:16px;color:#c3d6f5;font-size:1.04rem}
+  .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:32px}
+  .stat strong{
+    display:block;
+    color:#fff;
+    font-size:clamp(1.9rem,3.3vw,2.55rem);
+    font-weight:800;letter-spacing:-.035em;line-height:1.1;
+  }
+  .stat span{display:block;margin-top:8px;color:#b9cdf0;font-size:.92rem}
+  .trust-row{
+    display:flex;flex-wrap:wrap;gap:14px 30px;
+    margin-top:clamp(36px,5vw,54px);
+    padding-top:28px;
+    border-top:1px solid rgba(255,255,255,.16);
+    color:#c9dbf7;font-size:.88rem;
+  }
+  .trust-row li{display:flex;align-items:center;gap:9px}
+  .trust-row svg{width:16px;height:16px;flex:none;color:#8fb6f5}
+
+  /* ---------- pricing ---------- */
+  .price-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(268px,1fr));
+    gap:24px;
+    align-items:start;
+  }
+  .plan{
+    position:relative;
+    display:flex;flex-direction:column;
+    padding:32px 28px;
+    border:1px solid var(--line);
+    border-radius:18px;
+    background:#fff;
+    box-shadow:var(--shadow-sm);
+  }
+  .plan.featured{
+    border:1.5px solid var(--blue-500);
+    box-shadow:0 34px 66px -34px rgba(37,99,235,.75);
+  }
+  .plan-badge{
+    position:absolute;top:-13px;left:50%;transform:translateX(-50%);
+    padding:6px 14px;
+    border-radius:999px;
+    background:var(--blue-600);
+    color:#fff;
+    font-size:.71rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+    box-shadow:0 12px 26px -14px rgba(37,99,235,1);
+  }
+  .plan h3{font-size:1.14rem}
+  .plan-desc{margin-top:8px;color:var(--muted);font-size:.92rem;min-height:44px}
+  .plan-price{display:flex;align-items:flex-end;gap:7px;margin-top:22px}
+  .plan-price b{font-size:2.55rem;font-weight:800;letter-spacing:-.045em;line-height:1}
+  .plan-price span{padding-bottom:6px;color:var(--muted);font-size:.86rem}
+  .plan .btn{margin-top:24px;justify-content:center}
+  .plan-features{
+    display:flex;flex-direction:column;gap:12px;
+    margin-top:26px;padding-top:24px;
+    border-top:1px solid var(--line);
+    font-size:.925rem;
+  }
+  .plan-features li{display:flex;gap:10px;align-items:flex-start;color:var(--ink-2)}
+  .plan-features svg{width:17px;height:17px;flex:none;margin-top:3px;color:var(--blue-600)}
+  .price-note{margin-top:28px;text-align:center;color:var(--muted);font-size:.86rem}
+
+  /* ---------- testimonials ---------- */
+  .quote-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:24px;
+  }
+  .quote{
+    display:flex;flex-direction:column;gap:20px;
+    padding:28px 26px;
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    background:#fff;
+    box-shadow:var(--shadow-sm);
+  }
+  .quote-mark{width:26px;height:26px;color:var(--blue-200)}
+  .quote p{flex:1;color:var(--ink-2);font-size:.99rem}
+  .quote-person{
+    display:flex;align-items:center;gap:12px;
+    padding-top:20px;
+    border-top:1px solid var(--line);
+  }
+  .avatar{
+    display:grid;place-items:center;
+    width:40px;height:40px;flex:none;
+    border-radius:50%;
+    background:linear-gradient(140deg,var(--blue-100),var(--blue-200));
+    color:var(--blue-700);
+    font-size:.84rem;font-weight:800;letter-spacing:.02em;
+  }
+  .quote-person b{display:block;font-size:.92rem}
+  .quote-person small{display:block;color:var(--muted);font-size:.815rem;line-height:1.4}
+
+  /* ---------- faq ---------- */
+  .faq-grid{
+    display:grid;
+    grid-template-columns:.9fr 1.1fr;
+    gap:clamp(32px,5vw,64px);
+    align-items:start;
+  }
+  .faq-copy h2{margin-bottom:18px}
+  .faq-copy p{color:var(--muted);font-size:1.03rem}
+  .faq-copy a{color:var(--blue-600);font-weight:600;text-decoration:none}
+  .faq-copy a:hover{text-decoration:underline}
+  .faq-list{display:flex;flex-direction:column;gap:12px}
+  details.faq{
+    padding:18px 22px;
+    border:1px solid var(--line);
+    border-radius:14px;
+    background:#fff;
+    box-shadow:var(--shadow-sm);
+    transition:border-color .2s,box-shadow .2s;
+  }
+  details.faq[open]{border-color:var(--blue-200);box-shadow:var(--shadow-md)}
+  details.faq summary{
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    cursor:pointer;
+    font-size:.975rem;font-weight:600;
+    list-style:none;
+  }
+  details.faq summary::-webkit-details-marker{display:none}
+  details.faq summary::after{
+    content:"";
+    width:9px;height:9px;flex:none;
+    margin-top:-5px;
+    border-right:2px solid var(--blue-600);
+    border-bottom:2px solid var(--blue-600);
+    transform:rotate(45deg);
+    transition:transform .2s;
+  }
+  details.faq[open] summary::after{transform:rotate(-135deg);margin-top:5px}
+  details.faq p{margin-top:14px;color:var(--muted);font-size:.94rem}
+
+  /* ---------- cta ---------- */
+  .cta-panel{
+    position:relative;
+    overflow:hidden;
+    padding:clamp(40px,6vw,72px);
+    border-radius:24px;
+    background:linear-gradient(150deg,#0a2450 0%,#1b52b8 68%,#2563eb 100%);
+    box-shadow:0 44px 84px -44px rgba(15,44,107,.75);
+    text-align:center;
+  }
+  .cta-panel::before{
+    content:"";
+    position:absolute;
+    inset:auto -12% -58% -12%;
+    height:380px;
+    background:radial-gradient(closest-side,rgba(147,197,253,.38),transparent);
+    pointer-events:none;
+  }
+  .cta-panel > *{position:relative}
+  .cta-panel h2{max-width:660px;margin:20px auto 0;color:#fff}
+  .cta-panel > p{margin-top:16px;color:#c7daf8;font-size:1.03rem}
+
+  .signup{
+    display:flex;gap:10px;
+    max-width:470px;
+    margin:32px auto 0;
+    padding:8px;
+    border:1px solid rgba(255,255,255,.2);
+    border-radius:14px;
+    background:rgba(255,255,255,.1);
+  }
+  .signup input{
+    flex:1;min-width:0;
+    padding:12px 16px;
+    border:0;
+    background:transparent;
+    color:#fff;
+    font-family:inherit;font-size:.96rem;
+    outline:none;
+  }
+  .signup input::placeholder{color:#a9c2ea}
+  .signup input:focus-visible{outline:2px solid rgba(255,255,255,.55);outline-offset:2px;border-radius:8px}
+  .signup .btn{white-space:nowrap}
+
+  .form-note{margin-top:16px;color:#aec7ec;font-size:.82rem}
+  .form-error{margin-top:14px;color:#fecaca;font-size:.85rem}
+
+  .signup-success{
+    display:flex;align-items:center;gap:16px;
+    max-width:520px;
+    margin:32px auto 0;
+    padding:18px 22px;
+    border:1px solid rgba(255,255,255,.26);
+    border-radius:14px;
+    background:rgba(255,255,255,.13);
+    color:#eaf1ff;
+    text-align:left;
+  }
+  .success-icon{
+    display:grid;place-items:center;
+    width:36px;height:36px;flex:none;
+    border-radius:50%;
+    background:#fff;color:var(--blue-600);
+  }
+  .success-icon svg{width:19px;height:19px}
+  .signup-success b{display:block;font-size:.98rem}
+  .signup-success span{display:block;margin-top:3px;color:#c7daf8;font-size:.87rem;line-height:1.45}
+
+  /* ---------- footer ---------- */
+  .site-footer{
+    padding:clamp(48px,6vw,76px) 0 32px;
+    background:#081a38;
+    color:#c3d6f5;
+  }
+  .footer-grid{
+    display:grid;
+    grid-template-columns:1.6fr 1fr 1fr 1fr;
+    gap:40px;
+  }
+  .site-footer .brand{color:#fff}
+  .footer-brand p{margin-top:16px;max-width:280px;color:#93adcf;font-size:.9rem}
+  .footer-col h4{
+    margin-bottom:16px;
+    color:#fff;
+    font-size:.79rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;
+  }
+  .footer-col a{
+    display:block;
+    padding:6px 0;
+    color:#b3c8e6;font-size:.92rem;
+    text-decoration:none;
+    transition:color .18s;
+  }
+  .footer-col a:hover{color:#fff}
+  .footer-bottom{
+    display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;
+    margin-top:clamp(40px,5vw,56px);
+    padding-top:26px;
+    border-top:1px solid rgba(255,255,255,.12);
+    color:#8fa8ca;font-size:.84rem;
+  }
+
+  /* ---------- responsive ---------- */
+  @media (max-width:980px){
+    .hero-grid{grid-template-columns:1fr;gap:52px}
+    .hero-copy{max-width:none}
+    .how-grid,.faq-grid{grid-template-columns:1fr}
+    .stat-grid{grid-template-columns:repeat(2,1fr);gap:28px}
+    .mock-float{left:12px}
+  }
+
+  @media (max-width:760px){
+    .nav-links{display:none}
+    .footer-grid{grid-template-columns:1fr 1fr;gap:32px}
+    .footer-brand{grid-column:1 / -1}
+  }
+
+  @media (max-width:640px){
+    .container{padding:0 20px}
+    .nav{height:64px}
+    .btn-quiet{display:none}
+    .hero{padding-top:40px}
+    .hero-actions{gap:10px}
+    .hero-actions .btn{width:100%;justify-content:center}
+    .hero-checks{gap:10px 18px;font-size:.87rem}
+    .stat-grid{grid-template-columns:1fr}
+    .mock-cols{grid-template-columns:1fr;min-height:0}
+    .mock-side{display:none}
+    .mock-float{position:static;margin:0 16px 20px;left:auto;bottom:auto}
+    .step{padding:20px;gap:14px}
+    .plan{padding:28px 22px}
+    .signup{flex-direction:column;gap:12px;padding:0;border:0;background:transparent}
+    .signup input{
+      width:100%;
+      border:1px solid rgba(255,255,255,.24);
+      border-radius:10px;
+      background:rgba(255,255,255,.12);
+    }
+    .signup .btn{width:100%;justify-content:center}
+    .signup-success{flex-direction:column;align-items:flex-start;gap:12px}
+    .footer-grid{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container nav">
+    <a class="brand" href="#top">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12h.01"/><path d="M4.9 19.1a10 10 0 0 1 0-14.2"/><path d="M7.8 16.2a6 6 0 0 1 0-8.5"/><path d="M16.2 7.8a6 6 0 0 1 0 8.5"/><path d="M19.1 4.9a10 10 0 0 1 0 14.2"/></svg>
+      </span>
+      Beacon
+    </a>
+
+    <nav class="nav-links" aria-label="Main">
+      <a href="#features">Features</a>
+      <a href="#how">How it works</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+
+    <div class="nav-cta">
+      <a class="btn-quiet" href="#cta">Sign in</a>
+      <a class="btn btn-primary" href="#cta">Start free</a>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- ============ HERO ============ -->
+  <section class="hero">
+    <div class="container hero-grid">
+      <div class="hero-copy">
+        <span class="pill">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+          New: AI theme clustering
+        </span>
+
+        <h1>Turn scattered feedback into a <span class="accent">roadmap users love</span>.</h1>
+
+        <p class="lede">Beacon pulls every ticket, app review and call note into one place, groups it automatically, and shows your team what to build next — with the evidence right behind it.</p>
+
+        <div class="hero-actions">
+          <a class="btn btn-primary btn-lg" href="#cta">
+            Start free
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+          <a class="btn btn-outline btn-lg" href="#how">See how it works</a>
+        </div>
+
+        <ul class="hero-checks">
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            Free for 14 days
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            No credit card
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            Live in minutes
+          </li>
+        </ul>
+      </div>
+
+      <div class="hero-visual">
+        <div class="mock" aria-hidden="true">
+          <div class="mock-top">
+            <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            <div class="mock-title">Inbox · 248 open</div>
+          </div>
+
+          <div class="mock-cols">
+            <div class="mock-side">
+              <span class="side-item active" style="width:82%"></span>
+              <span class="side-item" style="width:64%"></span>
+              <span class="side-item" style="width:74%"></span>
+              <span class="side-item" style="width:56%"></span>
+              <span class="side-item" style="width:68%"></span>
+            </div>
+
+            <div class="mock-list">
+              <article class="mock-row">
+                <span class="mock-avatar"></span>
+                <div class="mock-lines"><i style="width:78%"></i><i style="width:52%"></i></div>
+                <span class="chip">Billing</span>
+              </article>
+              <article class="mock-row">
+                <span class="mock-avatar"></span>
+                <div class="mock-lines"><i style="width:64%"></i><i style="width:44%"></i></div>
+                <span class="chip">Onboarding</span>
+              </article>
+              <article class="mock-row">
+                <span class="mock-avatar"></span>
+                <div class="mock-lines"><i style="width:86%"></i><i style="width:58%"></i></div>
+                <span class="chip chip-slate">Mobile app</span>
+              </article>
+              <article class="mock-row">
+                <span class="mock-avatar"></span>
+                <div class="mock-lines"><i style="width:70%"></i><i style="width:48%"></i></div>
+                <span class="chip">Integrations</span>
+              </article>
+            </div>
+          </div>
+
+          <div class="mock-float">
+            <span class="float-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            </span>
+            <div>
+              <strong>+38%</strong>
+              <small>Feature adoption</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PROOF ============ -->
+  <section class="proof">
+    <div class="container">
+      <p class="proof-label">Trusted by product teams at</p>
+      <div class="proof-logos">
+        <span>Northwind</span>
+        <span>Lumen</span>
+        <span>Parcel</span>
+        <span>Orbit Labs</span>
+        <span>Haven</span>
+        <span>Vantage</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FEATURES ============ -->
+  <section class="section section-tint" id="features">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">The platform</span>
+        <h2>Everything you need to close the loop with customers</h2>
+        <p>One workspace for collecting feedback, finding the pattern inside it, and telling people when their idea shipped.</p>
+      </div>
+
+      <div class="feature-grid">
+        <article class="card">
+          <span class="icon-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </span>
+          <h3>One unified inbox</h3>
+          <p>Pipe in support tickets, app store reviews, sales call notes and survey responses. Deduplicated, tagged and searchable in a single stream.</p>
+        </article>
+
+        <article class="card">
+          <span class="icon-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+          </span>
+          <h3>AI theme clustering</h3>
+          <p>Beacon groups thousands of comments into clear themes and ranks them by how many customers — and how much revenue — each one touches.</p>
+        </article>
+
+        <article class="card">
+          <span class="icon-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+          </span>
+          <h3>Revenue-weighted priorities</h3>
+          <p>Score every request against ARR, churn risk and engineering effort, so the loudest voice in the room is never the only deciding one.</p>
+        </article>
+
+        <article class="card">
+          <span class="icon-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+          </span>
+          <h3>Public roadmap</h3>
+          <p>Publish a roadmap customers can follow, vote on and subscribe to — while the internal version stays exactly where it should.</p>
+        </article>
+
+        <article class="card">
+          <span class="icon-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          </span>
+          <h3>Close-the-loop notifications</h3>
+          <p>When something ships, everyone who asked hears about it automatically. No more "is this done yet?" pings landing in your inbox.</p>
+        </article>
+
+        <article class="card">
+          <span class="icon-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          </span>
+          <h3>Fits your stack</h3>
+          <p>Slack, Linear, Jira, HubSpot, Zendesk, Segment and a full REST API. Beacon slots into the tools your team already lives in.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ HOW IT WORKS ============ -->
+  <section class="section" id="how">
+    <div class="container how-grid">
+      <div class="how-copy">
+        <span class="eyebrow">How it works</span>
+        <h2>From raw feedback to a decision your team can defend</h2>
+        <p>No migration project, no new process for your support team to learn. Connect a source and Beacon starts working in the background.</p>
+
+        <div class="mini-note">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          <p><strong>Most teams are live in under 10 minutes.</strong> The longest part is usually choosing which Slack channel to point at first.</p>
+        </div>
+      </div>
+
+      <ol class="steps">
+        <li class="step">
+          <span class="step-num">1</span>
+          <div>
+            <h3>Connect your sources</h3>
+            <p>One-click integrations pull in the conversations your team already has. Historical data imports quietly in the background while you keep working.</p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-num">2</span>
+          <div>
+            <h3>Let Beacon cluster it</h3>
+            <p>Themes, sentiment and revenue impact are generated automatically — and you can rename, merge or split any cluster in a single click.</p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-num">3</span>
+          <div>
+            <h3>Ship it and tell everyone</h3>
+            <p>Push prioritized work straight to Linear or Jira, then let Beacon notify every customer who asked for it when it goes live.</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============ STATS BAND ============ -->
+  <section class="section band">
+    <div class="container">
+      <div class="band-head">
+        <span class="eyebrow" style="color:#8fb6f5">By the numbers</span>
+        <h2>Less guessing. Fewer "why did we build that?" conversations.</h2>
+        <p>Teams using Beacon stop debating whose opinion is loudest and start pointing at the data.</p>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat">
+          <strong>38%</strong>
+          <span>Faster roadmap decisions</span>
+        </div>
+        <div class="stat">
+          <strong>6 hrs</strong>
+          <span>Saved per PM every week</span>
+        </div>
+        <div class="stat">
+          <strong>4,000+</strong>
+          <span>Product teams on Beacon</span>
+        </div>
+        <div class="stat">
+          <strong>12M</strong>
+          <span>Feedback items processed monthly</span>
+        </div>
+      </div>
+
+      <ul class="trust-row">
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          SOC 2 Type II
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          SSO &amp; SAML
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          GDPR ready
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          99.9% uptime SLA
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ PRICING ============ -->
+  <section class="section section-tint" id="pricing">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">Pricing</span>
+        <h2>Start free, upgrade when the backlog gets serious</h2>
+        <p>Every plan includes unlimited feedback sources, the public roadmap and close-the-loop notifications.</p>
+      </div>
+
+      <div class="price-grid">
+        <div class="plan">
+          <h3>Starter</h3>
+          <p class="plan-desc">For small teams finding their footing with customer feedback.</p>
+          <div class="plan-price">
+            <b>$0</b>
+            <span>forever</span>
+          </div>
+          <a class="btn btn-outline" href="#cta">Start free</a>
+          <ul class="plan-features">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>Up to 500 feedback items / month</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>3 team members</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>Helpdesk &amp; email sync</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>Basic theme clustering</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>Community support</li>
+          </ul>
+        </div>
+
+        <div class="plan featured">
+          <span class="plan-badge">Most popular</span>
+          <h3>Growth</h3>
+          <p class="plan-desc">For product teams who ship against a real, evidence-backed roadmap.</p>
+          <div class="plan-price">
+            <b>$49</b>
+            <span>/ editor / month</span>
+          </div>
+          <a class="btn btn-primary" href="#cta">Start 14-day trial</a>
+          <ul class="plan-features">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>Everything in Starter</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>Unlimited feedback items</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>AI clustering, sentiment &amp; summaries</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>Revenue-weighted scoring</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>Slack, Linear, Jira &amp; Zendesk</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>Priority support</li>
+          </ul>
+        </div>
+
+        <div class="plan">
+          <h3>Scale</h3>
+          <p class="plan-desc">For larger organisations with security, audit and residency needs.</p>
+          <div class="plan-price">
+            <b>$149</b>
+            <span>/ editor / month</span>
+          </div>
+          <a class="btn btn-outline" href="#cta">Talk to sales</a>
+          <ul class="plan-features">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>Everything in Growth</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>SSO / SAML &amp; SCIM provisioning</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>Custom roles &amp; audit log</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>Data residency options</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>Dedicated success manager</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>Security review support</li>
+          </ul>
+        </div>
+      </div>
+
+      <p class="price-note">Prices in USD. Annual billing saves 20%. Non-profit and early-stage discounts available.</p>
+    </div>
+  </section>
+
+  <!-- ============ TESTIMONIALS ============ -->
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">Customer stories</span>
+        <h2>What changes once the evidence is on the screen</h2>
+      </div>
+
+      <div class="quote-grid">
+        <figure class="quote">
+          <svg class="quote-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 17h3l2-4V7H5v6h3z"/><path d="M16 17h3l2-4V7h-6v6h3z"/></svg>
+          <blockquote><p>We cut our roadmap meeting from two hours to twenty minutes. The evidence is already on the screen when we walk in, so we argue about trade-offs instead of anecdotes.</p></blockquote>
+          <figcaption class="quote-person">
+            <span class="avatar" aria-hidden="true">PR</span>
+            <div>
+              <b>Priya Raman</b>
+              <small>Head of Product, Northwind</small>
+            </div>
+          </figcaption>
+        </figure>
+
+        <figure class="quote">
+          <svg class="quote-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 17h3l2-4V7H5v6h3z"/><path d="M16 17h3l2-4V7h-6v6h3z"/></svg>
+          <blockquote><p>Beacon paid for itself inside a quarter. It surfaced three churn drivers that nobody on the team had connected, because each one looked like a one-off complaint.</p></blockquote>
+          <figcaption class="quote-person">
+            <span class="avatar" aria-hidden="true">MV</span>
+            <div>
+              <b>Marcus Vale</b>
+              <small>VP Customer Success, Lumen</small>
+            </div>
+          </figcaption>
+        </figure>
+
+        <figure class="quote">
+          <svg class="quote-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 17h3l2-4V7H5v6h3z"/><path d="M16 17h3l2-4V7h-6v6h3z"/></svg>
+          <blockquote><p>Our customers actually noticed. Close-the-loop notifications did more for our NPS number than anything else we tried last year, and it runs itself.</p></blockquote>
+          <figcaption class="quote-person">
+            <span class="avatar" aria-hidden="true">EF</span>
+            <div>
+              <b>Elena Fischer</b>
+              <small>Director of Product, Parcel</small>
+            </div>
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FAQ ============ -->
+  <section class="section section-tint" id="faq">
+    <div class="container faq-grid">
+      <div class="faq-copy">
+        <span class="eyebrow">FAQ</span>
+        <h2>Questions before you connect a source</h2>
+        <p>Still unsure about something? <a href="#cta">Send us a note</a> and a human on the product team will answer — usually the same day.</p>
+      </div>
+
+      <div class="faq-list">
+        <details class="faq">
+          <summary>How long does setup actually take?</summary>
+          <p>Connecting a helpdesk or Slack channel takes a couple of minutes. Historical imports run in the background, so you can start triaging new feedback immediately and watch the archive fill in behind it.</p>
+        </details>
+
+        <details class="faq" open>
+          <summary>Where does Beacon pull feedback from?</summary>
+          <p>Zendesk, Intercom, HubSpot, Slack, email forwarding, CSV import, app store reviews via the API, and any custom source you can reach with our REST API or webhooks.</p>
+        </details>
+
+        <details class="faq">
+          <summary>Will our customer data be used to train models?</summary>
+          <p>No. Your data is used to generate clusters and summaries for your workspace only, and it is never pooled into training data for other customers. Enterprise plans can disable AI features entirely.</p>
+        </details>
+
+        <details class="faq">
+          <summary>Can we keep our roadmap private?</summary>
+          <p>Yes. The public roadmap is a separate, opt-in view. You choose exactly which items appear there, and everything else stays internal by default.</p>
+        </details>
+
+        <details class="faq">
+          <summary>What happens when the trial ends?</summary>
+          <p>Your workspace drops to the Starter plan automatically — nothing is deleted, and you keep read access to everything you imported. Upgrade whenever you're ready.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CTA ============ -->
+  <section class="section" id="cta">
+    <div class="container">
+      <div class="cta-panel">
+        <span class="pill pill-on-dark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          Free 14-day trial
+        </span>
+
+        <h2>Put your customers back at the centre of the roadmap</h2>
+        <p>Create a workspace, connect one source, and see your first clusters in minutes.</p>
+
+        <form class="signup" id="beacon-signup" novalidate>
+          <label class="sr-only" for="email">Work email</label>
+          <input id="email" name="email" type="email" placeholder="you@company.com" autocomplete="email" required>
+          <button class="btn btn-light" type="submit">
+            Get started
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </button>
+        </form>
+
+        <p class="form-error" id="form-error" hidden>Please enter a valid work email address.</p>
+
+        <div class="signup-success" id="signup-success" hidden>
+          <span class="success-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </span>
+          <div>
+            <b>You're in. Check your inbox.</b>
+            <span>We've sent your workspace link and a short guide to your first 10 minutes in Beacon.</span>
+          </div>
+        </div>
+
+        <p class="form-note" id="form-note">No credit card required · Cancel anytime · Set up in minutes</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="brand" href="#top">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12h.01"/><path d="M4.9 19.1a10 10 0 0 1 0-14.2"/><path d="M7.8 16.2a6 6 0 0 1 0-8.5"/><path d="M16.2 7.8a6 6 0 0 1 0 8.5"/><path d="M19.1 4.9a10 10 0 0 1 0 14.2"/></svg>
+          </span>
+          Beacon
+        </a>
+        <p>The customer feedback platform for product teams who'd rather build the right thing than build more things.</p>
+      </div>
+
+      <div class="footer-col">
+        <h4>Product</h4>
+        <a href="#features">Features</a>
+        <a href="#how">How it works</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#faq">FAQ</a>
+      </div>
+
+      <div class="footer-col">
+        <h4>Company</h4>
+        <a href="#cta">About us</a>
+        <a href="#cta">Careers</a>
+        <a href="#cta">Customers</a>
+        <a href="#cta">Contact</a>
+      </div>
+
+      <div class="footer-col">
+        <h4>Resources</h4>
+        <a href="#cta">Documentation</a>
+        <a href="#cta">API reference</a>
+        <a href="#cta">Integrations</a>
+        <a href="#cta">Security</a>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>© 2024 Beacon Software Ltd. All rights reserved.</span>
+      <span>Privacy · Terms · Cookies</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var form = document.getElementById('beacon-signup');
+  if (!form) return;
+
+  var note = document.getElementById('form-note');
+  var error = document.getElementById('form-error');
+  var success = document.getElementById('signup-success');
+  var button = form.querySelector('button[type="submit"]');
+  var originalLabel = button ? button.innerHTML : '';
+
+  form.addEventListener('submit', async function (event) {
+    event.preventDefault();
+
+    var data = Object.fromEntries(new FormData(form));
+    var email = (data.email || '').trim();
+
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+      if (error) error.hidden = false;
+      return;
+    }
+    if (error) error.hidden = true;
+
+    if (button) {
+      button.disabled = true;
+      button.textContent = 'Sending…';
+    }
+
+    if (window.STARTUPVERSE_SUBMIT_URL) {
+      try {
+        await fetch(window.STARTUPVERSE_SUBMIT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email, source: 'landing-cta' })
+        });
+      } catch (err) {
+        /* The confirmation below still reflects the user's intent. */
+      }
+    }
+
+    form.hidden = true;
+    if (note) note.hidden = true;
+    if (error) error.hidden = true;
+    if (success) success.hidden = false;
+
+    /* Restore the button in case the user returns to the form. */
+    if (button) {
+      button.disabled = false;
+      button.innerHTML = originalLabel;
+    }
+  });
+})();
+</script>
+
+</body>
+</html>
