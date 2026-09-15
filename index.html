@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HealthTrack — Your health data, finally making sense</title>
+<meta name="description" content="HealthTrack brings your sleep, activity, heart rate and lab results into one clear timeline, with trends you can actually read.">
+<style>
+  :root{
+    --blue-50:#eef4ff;
+    --blue-100:#dbe7ff;
+    --blue-200:#c2d6ff;
+    --blue-500:#3b82f6;
+    --blue-600:#2563eb;
+    --blue-700:#1d4ed8;
+    --blue-900:#0f2557;
+    --ink:#0b1526;
+    --muted:#57678a;
+    --line:#e4eaf4;
+    --surface:#f6f9fe;
+    --white:#ffffff;
+    --radius-sm:10px;
+    --radius:16px;
+    --radius-lg:24px;
+    --shadow-sm:0 1px 2px rgba(11,21,38,.06), 0 1px 3px rgba(11,21,38,.05);
+    --shadow-md:0 12px 28px -18px rgba(15,37,87,.35), 0 4px 12px -8px rgba(15,37,87,.18);
+    --shadow-lg:0 40px 70px -40px rgba(15,37,87,.45), 0 12px 32px -16px rgba(15,37,87,.22);
+    --maxw:1120px;
+  }
+
+  *,*::before,*::after{box-sizing:border-box;}
+
+  html{scroll-behavior:smooth;}
+
+  body{
+    margin:0;
+    background:var(--white);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,"Helvetica Neue",Arial,sans-serif;
+    font-size:1rem;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  h1,h2,h3{margin:0;line-height:1.12;letter-spacing:-0.02em;font-weight:800;}
+  p{margin:0;}
+  a{color:inherit;}
+  ul{margin:0;padding:0;list-style:none;}
+
+  .wrap{
+    width:100%;
+    max-width:var(--maxw);
+    margin:0 auto;
+    padding:0 24px;
+  }
+
+  .eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-size:.8125rem;
+    font-weight:600;
+    letter-spacing:.04em;
+    text-transform:uppercase;
+    color:var(--blue-700);
+    background:var(--blue-50);
+    border:1px solid var(--blue-100);
+    border-radius:999px;
+    padding:6px 14px;
+  }
+
+  .lead{
+    color:var(--muted);
+    font-size:1.125rem;
+    line-height:1.7;
+  }
+
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    font:inherit;
+    font-weight:600;
+    font-size:.9375rem;
+    line-height:1;
+    padding:14px 24px;
+    border-radius:999px;
+    border:1px solid transparent;
+    text-decoration:none;
+    cursor:pointer;
+    transition:transform .16s ease, box-shadow .16s ease, background-color .16s ease, border-color .16s ease;
+    white-space:nowrap;
+  }
+  .btn-primary{
+    background:var(--blue-600);
+    color:#fff;
+    box-shadow:0 10px 22px -12px rgba(37,99,235,.9);
+  }
+  .btn-primary:hover{background:var(--blue-700);transform:translateY(-1px);}
+  .btn-ghost{
+    background:#fff;
+    color:var(--ink);
+    border-color:var(--line);
+    box-shadow:var(--shadow-sm);
+  }
+  .btn-ghost:hover{border-color:var(--blue-200);color:var(--blue-700);transform:translateY(-1px);}
+  .btn-block{width:100%;}
+
+  :focus-visible{
+    outline:2px solid var(--blue-600);
+    outline-offset:3px;
+    border-radius:6px;
+  }
+
+  /* ---------- Nav ---------- */
+  .nav{
+    position:sticky;
+    top:0;
+    z-index:50;
+    background:rgba(255,255,255,.82);
+    backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav-inner{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:24px;
+    height:72px;
+  }
+  .brand{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    font-weight:800;
+    letter-spacing:-0.02em;
+    font-size:1.0625rem;
+    text-decoration:none;
+    color:var(--ink);
+  }
+  .brand-mark{
+    display:grid;
+    place-items:center;
+    width:34px;
+    height:34px;
+    border-radius:10px;
+    background:linear-gradient(140deg,var(--blue-500),var(--blue-700));
+    color:#fff;
+    box-shadow:0 8px 18px -10px rgba(37,99,235,.95);
+  }
+  .brand-mark svg{width:19px;height:19px;}
+  .nav-links{
+    display:flex;
+    align-items:center;
+    gap:32px;
+    font-size:.9375rem;
+    font-weight:500;
+    color:var(--muted);
+  }
+  .nav-links a{text-decoration:none;transition:color .15s ease;}
+  .nav-links a:hover{color:var(--blue-700);}
+  .nav-cta{padding:11px 20px;font-size:.875rem;}
+
+  /* ---------- Hero ---------- */
+  .hero{
+    position:relative;
+    overflow:hidden;
+    padding:88px 0 96px;
+    background:
+      radial-gradient(900px 480px at 82% 8%, rgba(59,130,246,.16), transparent 62%),
+      radial-gradient(700px 420px at 4% 0%, rgba(37,99,235,.10), transparent 60%),
+      linear-gradient(180deg,#fbfcff 0%, #ffffff 78%);
+  }
+  .hero::after{
+    content:"";
+    position:absolute;
+    inset:auto 0 0 0;
+    height:1px;
+    background:linear-gradient(90deg,transparent,var(--line),transparent);
+  }
+  .hero-grid{
+    display:grid;
+    grid-template-columns:1.05fr .95fr;
+    gap:72px;
+    align-items:center;
+  }
+  .hero h1{
+    font-size:clamp(2.25rem,5.4vw,3.6rem);
+    margin:24px 0 24px;
+  }
+  .hero h1 .accent{
+    color:var(--blue-600);
+    position:relative;
+    white-space:nowrap;
+  }
+  .hero h1 .accent::after{
+    content:"";
+    position:absolute;
+    left:0;right:0;bottom:.06em;
+    height:.14em;
+    background:var(--blue-100);
+    border-radius:999px;
+    z-index:-1;
+  }
+  .hero-actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    margin:32px 0 24px;
+  }
+  .hero-note{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:.875rem;
+    color:var(--muted);
+  }
+  .hero-note svg{width:16px;height:16px;color:var(--blue-600);flex:none;}
+
+  /* ---------- Hero device card ---------- */
+  .device{
+    position:relative;
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:var(--radius-lg);
+    padding:24px;
+    box-shadow:var(--shadow-lg);
+  }
+  .device-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    padding-bottom:16px;
+    border-bottom:1px solid var(--line);
+  }
+  .device-title{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:.9375rem;
+    font-weight:700;
+  }
+  .avatar{
+    display:grid;
+    place-items:center;
+    width:34px;height:34px;
+    border-radius:50%;
+    background:var(--blue-50);
+    color:var(--blue-700);
+    font-size:.8125rem;
+    font-weight:800;
+    border:1px solid var(--blue-100);
+  }
+  .pill{
+    font-size:.75rem;
+    font-weight:700;
+    letter-spacing:.02em;
+    color:var(--blue-700);
+    background:var(--blue-50);
+    border:1px solid var(--blue-100);
+    border-radius:999px;
+    padding:4px 10px;
+  }
+  .stats{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:12px;
+    margin:20px 0;
+  }
+  .stat{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius-sm);
+    padding:12px 14px;
+  }
+  .stat-label{
+    font-size:.6875rem;
+    font-weight:700;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:var(--muted);
+  }
+  .stat-value{
+    font-size:1.25rem;
+    font-weight:800;
+    letter-spacing:-0.02em;
+    margin-top:2px;
+  }
+  .stat-value span{
+    font-size:.75rem;
+    font-weight:600;
+    color:var(--muted);
+    margin-left:2px;
+  }
+  .chart-bars{
+    display:flex;
+    align-items:flex-end;
+    gap:10px;
+    height:120px;
+    padding-top:8px;
+  }
+  .chart-bars span{
+    flex:1;
+    height:var(--h);
+    border-radius:999px 999px 6px 6px;
+    background:var(--blue-100);
+    transition:height .3s ease;
+  }
+  .chart-bars span.hot{
+    background:linear-gradient(180deg,var(--blue-500),var(--blue-700));
+    box-shadow:0 8px 18px -10px rgba(37,99,235,1);
+  }
+  .chart-days{
+    display:flex;
+    gap:10px;
+    margin-top:10px;
+    font-size:.6875rem;
+    font-weight:600;
+    color:var(--muted);
+  }
+  .chart-days span{flex:1;text-align:center;}
+  .float-card{
+    position:absolute;
+    left:-28px;
+    bottom:36px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:12px 16px;
+    box-shadow:var(--shadow-md);
+  }
+  .float-icon{
+    display:grid;
+    place-items:center;
+    width:34px;height:34px;
+    border-radius:10px;
+    background:var(--blue-50);
+    color:var(--blue-700);
+    flex:none;
+  }
+  .float-icon svg{width:18px;height:18px;}
+  .float-title{font-size:.8125rem;font-weight:700;line-height:1.3;}
+  .float-sub{font-size:.75rem;color:var(--muted);line-height:1.3;}
+
+  /* ---------- Features ---------- */
+  .section{padding:96px 0;}
+  .section-head{
+    max-width:640px;
+    margin:0 auto 56px;
+    text-align:center;
+  }
+  .section-head h2{
+    font-size:clamp(1.75rem,3.2vw,2.375rem);
+    margin:20px 0 16px;
+  }
+  .features{background:#fff;}
+  .card-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:24px;
+  }
+  .card{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:32px;
+    transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  }
+  .card:hover{
+    transform:translateY(-3px);
+    border-color:var(--blue-200);
+    box-shadow:var(--shadow-md);
+  }
+  .card-icon{
+    display:grid;
+    place-items:center;
+    width:48px;height:48px;
+    border-radius:14px;
+    background:linear-gradient(150deg,var(--blue-50),#fff);
+    border:1px solid var(--blue-100);
+    color:var(--blue-700);
+    margin-bottom:24px;
+  }
+  .card-icon svg{width:24px;height:24px;}
+  .card h3{
+    font-size:1.125rem;
+    font-weight:700;
+    margin-bottom:12px;
+  }
+  .card p{color:var(--muted);font-size:.9375rem;line-height:1.7;}
+
+  /* ---------- Testimonials ---------- */
+  .testimonials{
+    background:
+      radial-gradient(700px 340px at 12% 0%, rgba(37,99,235,.10), transparent 65%),
+      var(--surface);
+    border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+  }
+  .quote-feature{
+    display:grid;
+    grid-template-columns:1.4fr 1fr;
+    gap:48px;
+    align-items:center;
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:var(--radius-lg);
+    padding:48px;
+    box-shadow:var(--shadow-md);
+  }
+  .quote-mark{
+    width:40px;height:40px;
+    color:var(--blue-200);
+    margin-bottom:16px;
+  }
+  .quote-feature blockquote{
+    margin:0;
+    font-size:clamp(1.25rem,2.2vw,1.625rem);
+    font-weight:600;
+    line-height:1.45;
+    letter-spacing:-0.015em;
+    color:var(--ink);
+  }
+  .quote-feature blockquote .hl{color:var(--blue-600);}
+  .author{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin-top:32px;
+  }
+  .author-avatar{
+    display:grid;
+    place-items:center;
+    width:46px;height:46px;
+    border-radius:50%;
+    background:linear-gradient(140deg,var(--blue-500),var(--blue-700));
+    color:#fff;
+    font-weight:800;
+    font-size:.9375rem;
+    flex:none;
+  }
+  .author-name{font-weight:700;font-size:.9375rem;}
+  .author-role{font-size:.8125rem;color:var(--muted);}
+  .quote-metrics{
+    display:grid;
+    gap:16px;
+ margin-left: 0;
+  }
+  .metric{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:20px 24px;
+  }
+  .metric-value{
+    font-size:1.75rem;
+    font-weight:800;
+    letter-spacing:-0.03em;
+    color:var(--blue-700);
+    line-height:1.1;
+  }
+  .metric-label{
+    font-size:.8125rem;
+    color:var(--muted);
+    margin-top:6px;
+  }
+  .quote-row{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:24px;
+    margin-top:24px;
+  }
+  .quote-small{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:28px;
+  }
+  .quote-small p{
+    font-size:.9375rem;
+    line-height:1.7;
+    color:var(--ink);
+  }
+  .quote-small .author{margin-top:20px;}
+  .quote-small .author-avatar{
+    width:38px;height:38px;
+    font-size:.8125rem;
+    background:var(--blue-50);
+    color:var(--blue-700);
+    border:1px solid var(--blue-100);
+  }
+
+  /* ---------- Pricing ---------- */
+  .pricing{background:#fff;}
+  .plan-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:24px;
+    max-width:880px;
+    margin:0 auto;
+    align-items:start;
+  }
+  .plan{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:var(--radius-lg);
+    padding:36px;
+    display:flex;
+    flex-direction:column;
+    height:100%;
+  }
+  .plan-featured{
+    position:relative;
+    border-color:var(--blue-200);
+    background:linear-gradient(180deg,#f8fbff,#fff);
+    box-shadow:var(--shadow-lg);
+  }
+  .plan-badge{
+    position:absolute;
+    top:-13px;
+    left:36px;
+    font-size:.75rem;
+    font-weight:700;
+    letter-spacing:.03em;
+    color:#fff;
+    background:var(--blue-600);
+    border-radius:999px;
+    padding:5px 13px;
+    box-shadow:0 8px 18px -10px rgba(37,99,235,1);
+  }
+  .plan-name{
+    font-size:.875rem;
+    font-weight:700;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:var(--blue-700);
+  }
+  .plan-price{
+    display:flex;
+    align-items:baseline;
+    gap:8px;
+    margin:16px 0 8px;
+  }
+  .plan-price strong{
+    font-size:clamp(2.25rem,4vw,2.75rem);
+    font-weight:800;
+    letter-spacing:-0.03em;
+    line-height:1;
+  }
+  .plan-price span{font-size:.9375rem;color:var(--muted);font-weight:500;}
+  .plan-desc{
+    color:var(--muted);
+    font-size:.9375rem;
+    line-height:1.65;
+    padding-bottom:24px;
+    border-bottom:1px solid var(--line);
+  }
+  .plan-list{
+    display:grid;
+    gap:14px;
+    margin:24px 0 32px;
+  }
+  .plan-list li{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    font-size:.9375rem;
+    line-height:1.55;
+  }
+  .plan-list svg{
+    width:18px;height:18px;
+    color:var(--blue-600);
+    flex:none;
+    margin-top:3px;
+  }
+  .plan-cta{margin-top:auto;}
+
+  /* ---------- Footer ---------- */
+  .footer{
+    position:relative;
+    background:#0a1526;
+    color:#c3cee3;
+    padding:80px 0 40px;
+    overflow:hidden;
+  }
+  .footer::before{
+    content:"";
+    position:absolute;
+    inset:-40% 0 auto 0;
+    height:520px;
+    background:radial-gradient(620px 320px at 50% 0%, rgba(37,99,235,.32), transparent 68%);
+    pointer-events:none;
+  }
+  .footer-inner{position:relative;}
+  .waitlist{
+    max-width:600px;
+    margin:0 auto;
+    text-align:center;
+  }
+  .waitlist h2{
+    color:#fff;
+    font-size:clamp(1.5rem,3vw,2rem);
+    margin-bottom:16px;
+  }
+  .waitlist p{
+    color:#9fb0cd;
+    font-size:.9375rem;
+    line-height:1.7;
+    margin-bottom:32px;
+  }
+  .waitlist form{
+    display:flex;
+    gap:12px;
+    align-items:stretch;
+  }
+  .waitlist input[type="email"]{
+    flex:1;
+    min-width:0;
+    font:inherit;
+    font-size:.9375rem;
+    color:#fff;
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.16);
+    border-radius:999px;
+    padding:14px 22px;
+    transition:border-color .16s ease, background-color .16s ease;
+  }
+  .waitlist input[type="email"]::placeholder{color:#8298bb;}
+  .waitlist input[type="email"]:focus{
+    outline:none;
+    border-color:var(--blue-500);
+    background:rgba(255,255,255,.1);
+  }
+  .waitlist .btn-primary{
+    background:var(--blue-600);
+    box-shadow:0 12px 26px -14px rgba(59,130,246,.95);
+  }
+  .waitlist-note{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    margin-top:16px;
+    font-size:.8125rem;
+    color:#8298bb;
+  }
+  .waitlist-note svg{width:15px;height:15px;color:var(--blue-500);flex:none;}
+
+  .success{
+    display:none;
+    align-items:center;
+    gap:14px;
+    text-align:left;
+    background:rgba(37,99,235,.14);
+    border:1px solid rgba(59,130,246,.42);
+    border-radius:var(--radius);
+    padding:18px 22px;
+  }
+  .success.open{display:flex;}
+  .success-icon{
+    display:grid;
+    place-items:center;
+    width:38px;height:38px;
+    border-radius:50%;
+    background:var(--blue-600);
+    color:#fff;
+    flex:none;
+  }
+  .success-icon svg{width:20px;height:20px;}
+  .success-title{color:#fff;font-weight:700;font-size:.9375rem;}
+  .success-sub{color:#9fb0cd;font-size:.8125rem;}
+
+  .footer-bottom{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:24px;
+    flex-wrap:wrap;
+    margin-top:72px;
+    padding-top:32px;
+    border-top:1px solid rgba(255,255,255,.1);
+  }
+  .footer .brand{color:#fff;}
+  .footer-links{
+    display:flex;
+    flex-wrap:wrap;
+    gap:24px;
+    font-size:.875rem;
+    color:#9fb0cd;
+  }
+  .footer-links a{text-decoration:none;transition:color .15s ease;}
+  .footer-links a:hover{color:#fff;}
+  .copyright{font-size:.8125rem;color:#7b8dab;}
+
+  /* ---------- Responsive ---------- */
+  @media (max-width:900px){
+    .hero-grid{grid-template-columns:1fr;gap:56px;}
+    .hero{padding:64px 0 80px;}
+    .float-card{left:auto;right:16px;bottom:-20px;}
+    .quote-feature{grid-template-columns:1fr;gap:36px;padding:36px;}
+    .quote-row{grid-template-columns:1fr;}
+  }
+
+  @media (max-width:640px){
+    .wrap{padding:0 20px;}
+    .section{padding:64px 0;}
+    .section-head{margin-bottom:40px;}
+    .nav-links{display:none;}
+    .hero{padding:48px 0 64px;}
+    .hero-actions{gap:10px;}
+    .hero-actions .btn{width:100%;}
+    .card-grid,
+    .plan-grid,
+    .stats{grid-template-columns:1fr;}
+    .card{padding:26px;}
+    .quote-feature{padding:28px;}
+    .plan{padding:28px;}
+    .plan-badge{left:28px;}
+    .waitlist form{flex-direction:column;}
+    .waitlist .btn{width:100%;}
+    .footer{padding:64px 0 32px;}
+    .footer-bottom{flex-direction:column;align-items:flex-start;margin-top:48px;}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto;}
+    *{transition:none !important;animation:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="#top">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12h4l2.5-6 3 12L15 12h6"/>
+        </svg>
+      </span>
+      HealthTrack
+    </a>
+    <nav class="nav-links" aria-label="Main">
+      <a href="#features">Features</a>
+      <a href="#testimonials">Stories</a>
+      <a href="#pricing">Pricing</a>
+    </nav>
+    <a class="btn btn-primary nav-cta" href="#waitlist">Join waitlist</a>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="eyebrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;" aria-hidden="true">
+            <path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/>
+          </svg>
+          Private beta
+        </span>
+
+        <h1>Your health data, <span class="accent">finally making sense</span>.</h1>
+
+        <p class="lead">
+          HealthTrack pulls sleep, activity, heart rate and lab results into one
+          clear timeline — then shows you the trends that actually matter, in
+          language you don't need a medical degree to read.
+        </p>
+
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#waitlist">
+            Join the waitlist
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;" aria-hidden="true">
+              <path d="M5 12h14M13 6l6 6-6 6"/>
+            </svg>
+          </a>
+          <a class="btn btn-ghost" href="#features">See how it works</a>
+        </div>
+
+        <p class="hero-note">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20 6 9 17l-5-5"/>
+          </svg>
+          Free through the beta · No credit card · Your data stays yours
+        </p>
+      </div>
+
+      <div class="device" aria-hidden="true">
+        <div class="device-head">
+          <div class="device-title">
+            <span class="avatar">AM</span>
+            Weekly overview
+          </div>
+          <span class="pill">Stable</span>
+        </div>
+
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-label">Resting HR</div>
+            <div class="stat-value">58 <span>bpm</span></div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Sleep</div>
+            <div class="stat-value">7h 24 <span>avg</span></div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Steps</div>
+            <div class="stat-value">8.9k <span>/day</span></div>
+          </div>
+        </div>
+
+        <div class="chart-bars">
+          <span style="--h:52%"></span>
+          <span style="--h:68%"></span>
+          <span style="--h:44%"></span>
+          <span class="hot" style="--h:92%"></span>
+          <span style="--h:74%"></span>
+          <span style="--h:60%"></span>
+          <span style="--h:82%"></span>
+        </div>
+        <div class="chart-days">
+          <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
+        </div>
+
+        <div class="float-card">
+          <span class="float-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 12h-6l-2 3h-4l-2-3H2"/>
+              <path d="M5.5 5.5h13l3.5 6.5v5a2 2 0 0 1-2 2h-16a2 2 0 0 1-2-2v-5z"/>
+            </svg>
+          </span>
+          <span>
+            <span class="float-title">Resting HR down 4 bpm</span><br>
+            <span class="float-sub">vs. your 30-day baseline</span>
+          </span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="section features" id="features">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Why HealthTrack</span>
+        <h2>Everything scattered, nothing connected</h2>
+        <p class="lead">
+          Most people have five apps and zero answers. HealthTrack puts the
+          pieces together and keeps them that way.
+        </p>
+      </div>
+
+      <div class="card-grid">
+        <article class="card">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 12h4l2.5-7 3.5 14 2.5-7h5.5"/>
+            </svg>
+          </div>
+          <h3>One timeline for everything</h3>
+          <p>
+            Wearables, lab PDFs, medications and symptoms land in a single
+            chronological view — so a bad week is something you can actually see
+            instead of something you try to remember.
+          </p>
+        </article>
+
+        <article class="card">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 3v18h18"/>
+              <path d="M7 15l3.5-4 3 3L20 7"/>
+            </svg>
+          </div>
+          <h3>Trends you can actually read</h3>
+          <p>
+            No raw exports or dashboards full of noise. HealthTrack compares each
+            metric against your own baseline and flags what changed — and
+            roughly how much it changed.
+          </p>
+        </article>
+
+        <article class="card">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              <path d="m9 12 2 2 4-4"/>
+            </svg>
+          </div>
+          <h3>Private by default</h3>
+          <p>
+            Your records are encrypted at rest and in transit, and never sold.
+            Share a read-only summary with a clinician when you choose to —
+            and revoke it whenever you want.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="section testimonials" id="testimonials">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Early access stories</span>
+        <h2>People who stopped guessing</h2>
+      </div>
+
+      <figure class="quote-feature">
+        <div>
+          <svg class="quote-mark" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M9.5 5.2c-3 1.6-5 4.5-5 8.1 0 3.3 1.9 5.5 4.5 5.5 2.2 0 3.9-1.6 3.9-3.7 0-2-1.4-3.5-3.3-3.5-.4 0-.8.1-1 .2.3-1.7 1.7-3.4 3.5-4.3l-2.6-2.3zm9 0c-3 1.6-5 4.5-5 8.1 0 3.3 1.9 5.5 4.5 5.5 2.2 0 3.9-1.6 3.9-3.7 0-2-1.4-3.5-3.3-3.5-.4 0-.8.1-1 .2.3-1.7 1.7-3.4 3.5-4.3l-2.6-2.3z"/>
+          </svg>
+          <blockquote>
+            I spent two years telling doctors I felt off and having nothing to
+            show for it. Six weeks of HealthTrack gave me a chart that showed
+            <span class="hl">my sleep collapsing before every flare</span>. That
+            one conversation changed my treatment.
+          </blockquote>
+          <figcaption class="author">
+            <span class="author-avatar">MR</span>
+            <span>
+              <span class="author-name">Maya Ríos</span><br>
+              <span class="author-role">Beta participant · Living with Crohn's</span>
+            </span>
+          </figcaption>
+        </div>
+
+        <div class="quote-metrics">
+          <div class="metric">
+            <div class="metric-value">3.1 hrs</div>
+            <div class="metric-label">Saved per month on logging and hunting through portals</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value">6 apps</div>
+            <div class="metric-label">Replaced by a single HealthTrack timeline</div>
+          </div>
+        </div>
+      </figure>
+
+      <div class="quote-row">
+        <figure class="quote-small">
+          <p>
+            "The baseline comparison is the whole product for me. It's the first
+            tool that told me my resting heart rate was drifting up — before I
+            noticed I was getting winded on stairs."
+          </p>
+          <figcaption class="author">
+            <span class="author-avatar">DK</span>
+            <span>
+              <span class="author-name">Daniel Kim</span><br>
+              <span class="author-role">Marathon runner, Portland</span>
+            </span>
+          </figcaption>
+        </figure>
+
+        <figure class="quote-small">
+          <p>
+            "I hand a summary to my endocrinologist instead of a folder of
+            printouts. She read it in two minutes and adjusted my dose the same
+            visit. That alone was worth it."
+          </p>
+          <figcaption class="author">
+            <span class="author-avatar">PA</span>
+            <span>
+              <span class="author-name">Priya Anand</span><br>
+              <span class="author-role">Type 1 diabetes, London</span>
+            </span>
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section class="section pricing" id="pricing">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Pricing</span>
+        <h2>Simple, and free while we build</h2>
+        <p class="lead">
+          Start free during the beta. Upgrade only if you want the deeper
+          analysis and family sharing.
+        </p>
+      </div>
+
+      <div class="plan-grid">
+        <article class="plan">
+          <div class="plan-name">Starter</div>
+          <div class="plan-price">
+            <strong>$0</strong>
+            <span>forever</span>
+          </div>
+          <p class="plan-desc">
+            Everything you need to get your metrics into one place.
+          </p>
+          <ul class="plan-list">
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+              Track up to 3 health metrics
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+              Connect one wearable or device
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+              Weekly summary email
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+              Encrypted storage, never sold
+            </li>
+          </ul>
+          <a class="btn btn-ghost btn-block plan-cta" href="#waitlist">Start free</a>
+        </article>
+
+        <article class="plan plan-featured">
+          <span class="plan-badge">Most popular</span>
+          <div class="plan-name">Pro</div>
+          <div class="plan-price">
+            <strong>$9</strong>
+            <span>/ month, billed yearly</span>
+          </div>
+          <p class="plan-desc">
+            For people managing a real condition — or who just want the details.
+          </p>
+          <ul class="plan-list">
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+              Everything in Starter
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+              Unlimited metrics and devices
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+              Custom trend reports &amp; baseline alerts
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+              Shareable clinician summaries
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+              Family sharing for up to 5 people
+            </li>
+          </ul>
+          <a class="btn btn-primary btn-block plan-cta" href="#waitlist">Join the Pro waitlist</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Footer + waitlist -->
+<footer class="footer" id="waitlist">
+  <div class="wrap footer-inner">
+    <div class="waitlist">
+      <h2>Be first in line</h2>
+      <p>
+        We're onboarding a small group of testers each week. Leave your email
+        and we'll send you an invite — no spam, and one click to opt out.
+      </p>
+
+      <form id="waitlist-form" novalidate>
+        <label for="waitlist-email" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;">Email address</label>
+        <input id="waitlist-email" type="email" name="email" placeholder="you@example.com" autocomplete="email" required>
+        <button class="btn btn-primary" type="submit">Join waitlist</button>
+      </form>
+
+      <div class="success" id="waitlist-success" role="status" aria-live="polite">
+        <span class="success-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 6 9 17l-5-5"/>
+          </svg>
+        </span>
+        <span>
+          <span class="success-title">You're on the list.</span><br>
+          <span class="success-sub">We'll email your invite as soon as a spot opens up.</span>
+        </span>
+      </div>
+
+      <p class="waitlist-note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+        We only use your email to contact you about HealthTrack.
+      </p>
+    </div>
+
+    <div class="footer-bottom">
+      <a class="brand" href="#top">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 12h4l2.5-6 3 12L15 12h6"/>
+          </svg>
+        </span>
+        HealthTrack
+      </a>
+      <nav class="footer-links" aria-label="Footer">
+        <a href="#features">Features</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#testimonials">Stories</a>
+        <a href="#waitlist">Waitlist</a>
+      </nav>
+      <p class="copyright">© 2024 HealthTrack. Not a medical device.</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var form = document.getElementById('waitlist-form');
+    var success = document.getElementById('waitlist-success');
+    var emailInput = document.getElementById('waitlist-email');
+    if (!form || !success) return;
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      var email = emailInput ? emailInput.value.trim() : '';
+      if (!email || email.indexOf('@') === -1) {
+        if (emailInput) emailInput.focus();
+        return;
+      }
+
+      var data = Object.fromEntries(new FormData(form));
+
+      if (window.STARTUPVERSE_SUBMIT_URL) {
+        fetch(window.STARTUPVERSE_SUBMIT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        }).catch(function () {});
+      }
+
+      form.style.display = 'none';
+      success.classList.add('open');
+    });
+  })();
+</script>
+
+</body>
+</html>
